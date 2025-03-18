@@ -1,167 +1,182 @@
-let phones = [];
+let store = [];
 let cart = [];
-let choice;
-let menu = `
-1. Hiển thị danh sách điện thoại theo hãng (Người dùng chọn hãng để xem điện thoại trong danh mục đó).
-2. Thêm điện thoại mới vào kho.
-3. Tìm kiếm điện thoại theo tên hoặc id.
-4. Mua điện thoại (Nhập id điện thoại cần mua và số lượng, cập nhật lại kho).
-5. Sắp xếp điện thoại theo giá:
-6. Tính tổng số lượng điện thoại đã mua và in ra tổng tiền trong giỏ hàng.
-7. Hiển thị tổng số lượng điện thoại trong kho.
-8. Thoát chương trình.
-==========================
-Moi nhap lua chon: `;
 
-while (choice !== 8) {
-  choice = +prompt(menu);
-  switch (choice) {
-    case 1:
-      displayPhone(phones);
-      break;
-    case 2:
-      addPhone();
-      break;
-    case 3:
-      findPhone();
-      break;
-    case 4:
-      buyProduct(phones);
-      break;
-    case 5:
-      sortPhones();
-      break;
-    case 6:
-      calTotal();
-      break;
-    case 7:
-      displayPhonesInStock();
-      break;
-    case 8:
-      alert(`Da thoat chuong trinh!`);
-      break;
-    default:
-      alert("Lua chon khong hop le!");
-  }
+function addPhone(id, name, price, quantity, company) {
+    const phone = {
+        id,
+        name,
+        price,
+        quantity,
+        company
+    };
+    store.push(phone);
+    console.log(`Đã thêm điện thoại ${name} vào cửa hàng.`);
 }
 
-function displayPhone(phones) {
-  if (phones.length === 0) {
-    alert("Danh sach dien thoai rong");
-    return;
-  }
-  console.log(`===Danh sach Dien Thoai Hien Tai:===`);
-  phones.forEach(function (phone) {
-    console.table(phone);
-    console.log(`==================================================`);
-  });
-}
-
-function addPhone() {
-  let id = Math.floor(Math.random() * 1000) + 1;
-  let name = prompt("Nhap ten dien thoai:");
-  let price = +prompt("Nhap gia dien thoai:");
-  let quantity = +prompt("Nhap so luong san pham");
-  let company = prompt("Nhap hang dien thoai:");
-  phones.push({ id, name, price, quantity, company });
-  alert(`Da them dien thoai moi vao kho`);
-}
-
-function findPhone() {
-  let choice;
-  let findIndex = -1;
-  let n = +prompt(`
-        1. Tim theo Ten dien thoai
-        2. Tim theo ID dien thoai`);
-  switch (n) {
-    case 1:
-      choice = prompt(`Moi nhap Ten dien thoai muon mua`);
-      findIndex = -1;
-      findIndex = phones.findIndex((phone) => phone.name === choice);
-      if (findIndex === -1) {
-        alert(`Khong co dien thoai nay`);
-      } else {
-        console.table(phones[findIndex]);
-        alert(`Da tim thay dien thoai muon mua`);
-      }
-      break;
-    case 2:
-      choice = +prompt(`Moi nhap ID dien thoai muon mua`);
-      findIndex = -1;
-      findIndex = phones.findIndex((phone) => phone.id === choice);
-      if (findIndex === -1) {
-        alert(`Khong co dien thoai nay`);
-      } else {
-        console.table(phones[findIndex]);
-        alert(`Da tim thay dien thoai muon mua`);
-      }
-      break;
-    default:
-      alert(`Lua chon khong hop le!`);
-  }
-}
-
-function sortPhones() {
-  let subMenu = `
-    a. Tăng dần.
-    b. Giảm dần.`;
-  let subChoice = prompt(subMenu);
-  switch (subChoice) {
-    case 'a':
-      phones.sort((a, b) => a.price - b.price);
-      alert(`Sap xep thanh cong!`);
-      break;
-    case 'b':
-      phones.sort((a, b) => b.price - a.price);
-      alert(`Sap xep thanh cong!`);
-      break;
-    default:
-      alert("Lua chon khong hop le!");
-  }
-}
-
-function buyProduct(products) {
-  let choice = +prompt(`Moi nhap ID dien thoai muon mua`);
-  let findIndex = -1;
-  findIndex = products.findIndex((product) => product.id === choice);
-  if (findIndex === -1) {
-    alert(`Khong co dien thoai nay trong cua hang`);
-  } else {
-    let amount = +prompt(`Moi nhap so luong muon mua: `);
-    if (products[findIndex].quantity < amount) {
-      alert(`So luong hang khong du`);
+function displayPhonesByCompany(company) {
+    const filteredPhones = store.filter(phone => phone.company === company);
+    if (filteredPhones.length === 0) {
+        console.log(`Không có điện thoại của hãng ${company} trong cửa hàng.`);
     } else {
-      products[findIndex].quantity -= amount;
-      let check = -1;
-      check = cart.findIndex((product) => product.id === products[findIndex].id);
-      if (check === -1) {
-        cart.push({ ...products[findIndex] });
-        cart[cart.length - 1].quantity = amount;
-      } else {
-        cart[check].quantity += amount;
-      }
-      alert(`Mua thanh cong!`);
+        console.log(`Danh sách điện thoại của hãng ${company}:`);
+        filteredPhones.forEach(phone => {
+            console.log(`ID: ${phone.id}, Tên: ${phone.name}, Giá: ${phone.price}, Số lượng: ${phone.quantity}`);
+        });
     }
-  }
 }
 
-function calTotal() {
-  let total = 0;
-  cart.forEach((product) => {
-    total += +product.price * +product.quantity;
-  });
-  let amount = 0;
-  cart.forEach((product) => {
-    amount += product.quantity;
-  });
-  alert(`Tong so luong san pham trong gio hang: ${amount}
-        So tien can thanh toan: ${total}`);
+function searchPhone(query) {
+    const foundPhones = store.filter(phone => phone.name.toLowerCase().includes(query.toLowerCase()) || phone.id == query);
+    if (foundPhones.length === 0) {
+        console.log(`Không tìm thấy điện thoại với tên hoặc ID: ${query}`);
+    } else {
+        console.log(`Kết quả tìm kiếm:`);
+        foundPhones.forEach(phone => {
+            console.log(`ID: ${phone.id}, Tên: ${phone.name}, Giá: ${phone.price}, Số lượng: ${phone.quantity}`);
+        });
+    }
 }
 
-function displayPhonesInStock() {
-  let amount = 0;
-  phones.forEach((product) => {
-    amount += product.quantity;
-  });
-  alert(`Tong so luong dien thoai trong kho: ${amount}`);
+function buyPhone(id, quantity) {
+    const phone = store.find(p => p.id === id);
+    if (!phone) {
+        console.log("Không tìm thấy điện thoại với ID này.");
+        return;
+    }
+
+    if (phone.quantity >= quantity) {
+        phone.quantity -= quantity;
+        const cartItem = { ...phone, quantity };
+        cart.push(cartItem);
+        console.log(`Đã thêm ${quantity} điện thoại ${phone.name} vào giỏ hàng.`);
+    } else {
+        console.log(`Không đủ số lượng điện thoại ${phone.name} trong cửa hàng.`);
+    }
 }
+
+function checkout() {
+    if (cart.length === 0) {
+        console.log("Giỏ hàng của bạn đang rỗng.");
+        return;
+    }
+
+    let total = 0;
+    cart.forEach(item => {
+        total += item.price * item.quantity;
+    });
+
+    console.log(`Thanh toán thành công! Tổng tiền là: ${total}`);
+    cart = [];
+}
+
+function sortPhonesByPrice(order) {
+    if (order === 'asc') {
+        store.sort((a, b) => a.price - b.price);
+        console.log("Đã sắp xếp điện thoại theo giá tăng dần.");
+    } else if (order === 'desc') {
+        store.sort((a, b) => b.price - a.price);
+        console.log("Đã sắp xếp điện thoại theo giá giảm dần.");
+    } else {
+        console.log("Tham số sắp xếp không hợp lệ. Vui lòng chọn 'asc' hoặc 'desc'.");
+    }
+}
+
+function showTotalValue() {
+    const totalValue = store.reduce((sum, phone) => sum + (phone.price * phone.quantity), 0);
+    console.log(`Tổng giá trị của tất cả điện thoại trong cửa hàng là: ${totalValue}`);
+}
+
+function showTotalQuantityByCompany() {
+    const companyQuantity = store.reduce((result, phone) => {
+        if (!result[phone.company]) {
+            result[phone.company] = 0;
+        }
+        result[phone.company] += phone.quantity;
+        return result;
+    }, {});
+
+    console.log("Tổng số lượng điện thoại theo hãng:");
+    for (const company in companyQuantity) {
+        console.log(`${company}: ${companyQuantity[company]}`);
+    }
+}
+
+function exit() {
+    console.log("Thoát chương trình.");
+    process.exit();
+}
+
+function showMenu() {
+    console.log("\n--- MENU ---");
+    console.log("1. Thêm điện thoại mới vào cửa hàng");
+    console.log("2. Hiển thị danh sách điện thoại theo hãng");
+    console.log("3. Tìm kiếm điện thoại theo tên hoặc ID");
+    console.log("4. Mua điện thoại");
+    console.log("5. Thanh toán giỏ hàng");
+    console.log("6. Sắp xếp điện thoại theo giá");
+    console.log("7. Hiển thị tổng giá trị của tất cả điện thoại trong cửa hàng");
+    console.log("8. Hiển thị tổng số lượng điện thoại theo từng hãng");
+    console.log("9. Thoát");
+}
+
+function runProgram() {
+    const readlineSync = require('readline-sync');
+
+    do {
+        showMenu();
+        const choice = readlineSync.question("Chọn một chức năng (1-9): ");
+
+        switch (choice) {
+            case '1':
+                const id = readlineSync.questionInt("Nhập ID điện thoại: ");
+                const name = readlineSync.question("Nhập tên điện thoại: ");
+                const price = readlineSync.questionInt("Nhập giá điện thoại: ");
+                const quantity = readlineSync.questionInt("Nhập số lượng: ");
+                const company = readlineSync.question("Nhập hãng điện thoại: ");
+                addPhone(id, name, price, quantity, company);
+                break;
+
+            case '2':
+                const companyName = readlineSync.question("Nhập tên hãng cần hiển thị: ");
+                displayPhonesByCompany(companyName);
+                break;
+
+            case '3':
+                const searchQuery = readlineSync.question("Nhập tên hoặc ID điện thoại cần tìm: ");
+                searchPhone(searchQuery);
+                break;
+
+            case '4':
+                const buyId = readlineSync.questionInt("Nhập ID điện thoại cần mua: ");
+                const buyQuantity = readlineSync.questionInt("Nhập số lượng cần mua: ");
+                buyPhone(buyId, buyQuantity);
+                break;
+
+            case '5':
+                checkout();
+                break;
+
+            case '6':
+                const sortOrder = readlineSync.question("Chọn thứ tự sắp xếp (asc/desc): ");
+                sortPhonesByPrice(sortOrder);
+                break;
+
+            case '7':
+                showTotalValue();
+                break;
+
+            case '8':
+                showTotalQuantityByCompany();
+                break;
+
+            case '9':
+                exit();
+                break;
+
+            default:
+                console.log("Lựa chọn không hợp lệ. Vui lòng chọn lại.");
+        }
+    } while (true);
+}
+
+runProgram();
